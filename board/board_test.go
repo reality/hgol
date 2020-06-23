@@ -46,4 +46,7 @@ func TestBoard(t *testing.T) {
 		}
 	}
 
+	board.progress()
+
+	board.String()
 }

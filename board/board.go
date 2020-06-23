@@ -41,7 +41,29 @@ func New(input string) *Board {
 	return b
 }
 
-func (b *Board) progress() {}
+func (b *Board) progress() {
+	for y, row := range b.w {
+		for x, cell := range row {
+			neighbours := b.getNeighbours(x, y)
+			aliveNeighbours := 0
+
+			for _, nVal := range neighbours {
+				if nVal == '1' {
+					aliveNeighbours++
+				}
+			}
+
+			// a dead cell with three living neighbours becomes alive, a living cell with two or three living neighbours can remain alive, but otherwise, everything must die
+			if cell == '0' && aliveNeighbours == 3 {
+				cell = '1'
+			} else if !(cell == '1' && (aliveNeighbours == 2 || aliveNeighbours == 3)) {
+				cell = '0'
+			}
+
+			b.w[y][x] = cell
+		}
+	}
+}
 
 // Get the eight neighbours of a cell position.
 // Essentially we either look up the value of the cell, or if it's outside the map, we assume it's dead
