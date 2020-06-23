@@ -17,8 +17,8 @@ func TestBoard(t *testing.T) {
 
 	board.String()
 
-	if len(board.binaryString) != expectedBinaryStringLength {
-		t.Fatalf("Wrong length of binary string. got=%d, expected=%d", len(board.binaryString), expectedBinaryStringLength)
+	if len(board.binaryStringBinaryString) != expectedBinaryStringLength {
+		t.Fatalf("Wrong length of binary string. got=%d, expected=%d", len(board.binaryStringBinaryString), expectedBinaryStringLength)
 	}
 
 	if len(board.w) != expectedY {
@@ -50,7 +50,7 @@ func TestBoard(t *testing.T) {
 
 	fmt.Printf("%c", board.w[10][15])
 
-	board.progress()
+	board.Progress()
 
 	progressTests := []struct {
 		y             int
