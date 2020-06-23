@@ -36,15 +36,26 @@ func New(input string) *Board {
 		charY, charX := pos/boardX, pos%boardX
 		b.w[charY][charX] = char
 	}
-	// TODO finish off the final line with the \x00 content
+
+	for pos, char := range b.w[boardY-1] {
+		if char != '0' && char != '1' {
+			b.w[boardY-1][pos] = '0'
+		}
+	}
 
 	return b
 }
 
 func (b *Board) progress() {
+	newWorld := make([][]rune, len(b.w))
+	for i := range b.w {
+		newWorld[i] = make([]rune, len(b.w[i]))
+		copy(newWorld[i], b.w[i])
+	}
+
 	for y, row := range b.w {
 		for x, cell := range row {
-			neighbours := b.getNeighbours(x, y)
+			neighbours := b.getNeighbours(y, x)
 			aliveNeighbours := 0
 
 			for _, nVal := range neighbours {
@@ -53,6 +64,8 @@ func (b *Board) progress() {
 				}
 			}
 
+			fmt.Printf("y=%d,x=%d. alive neighbours=%d\n", y, x, aliveNeighbours)
+
 			// a dead cell with three living neighbours becomes alive, a living cell with two or three living neighbours can remain alive, but otherwise, everything must die
 			if cell == '0' && aliveNeighbours == 3 {
 				cell = '1'
@@ -60,15 +73,17 @@ func (b *Board) progress() {
 				cell = '0'
 			}
 
-			b.w[y][x] = cell
+			newWorld[y][x] = cell
 		}
 	}
+
+	b.w = newWorld
 }
 
 // Get the eight neighbours of a cell position.
 // Essentially we either look up the value of the cell, or if it's outside the map, we assume it's dead
 // TODO this could potentially be simplified with a getCell that has a default value
-func (b *Board) getNeighbours(x int, y int) []rune {
+func (b *Board) getNeighbours(y int, x int) []rune {
 	var neighbours []rune
 
 	// First we iterate the three cells above our target cell, then the three below

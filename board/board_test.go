@@ -30,15 +30,17 @@ func TestBoard(t *testing.T) {
 	}
 
 	neighbourTests := []struct {
-		x                  int
 		y                  int
+		x                  int
 		expectedNeighbours []rune
 	}{
 		{0, 0, []rune{'0', '0', '0', '0', '1', '1', '0', '1'}},
+		{10, 15, []rune{'0', '1', '1', '0', '0', '0', '0', '0'}},
+		{8, 0, []rune{'0', '0', '1', '0', '1', '0', '0', '1'}},
 	}
 
 	for _, tt := range neighbourTests {
-		neighbours := board.getNeighbours(tt.x, tt.y)
+		neighbours := board.getNeighbours(tt.y, tt.x)
 		if string(tt.expectedNeighbours) != string(neighbours) {
 			t.Fatalf("Neighbours for y=%d,x=%d were not as expected.\nexpected=%s\ngot=     %s", tt.y, tt.x,
 				string(tt.expectedNeighbours),
@@ -46,7 +48,24 @@ func TestBoard(t *testing.T) {
 		}
 	}
 
+	fmt.Printf("%c", board.w[10][15])
+
 	board.progress()
 
-	board.String()
+	progressTests := []struct {
+		y             int
+		x             int
+		expectedValue rune
+	}{
+		{0, 0, '1'},   // remain alive
+		{10, 15, '0'}, // remain dead
+		{8, 0, '1'},   // become alive
+	}
+
+	for _, tt := range progressTests {
+		if board.w[tt.y][tt.x] != tt.expectedValue {
+			t.Fatalf("Progression for y=%d,x=%d was not as expected. expected=%c, got=%c.", tt.y, tt.x,
+				tt.expectedValue, board.w[tt.y][tt.x])
+		}
+	}
 }
