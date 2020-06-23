@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -58,7 +59,20 @@ func main() {
 }
 
 func post(poem string) {
-	api := anaconda.NewTwitterApiWithCredentials()
+	secritsFile, err := os.Open("./secrits.txt")
+	if err != nil {
+		fmt.Print("uhoh")
+	}
+	defer secritsFile.Close()
+
+	var cred []string
+	scanner := bufio.NewScanner(secritsFile)
+	for scanner.Scan() {
+		cred = append(cred, scanner.Text())
+	}
+
+	// heh
+	api := anaconda.NewTwitterApiWithCredentials(cred[0], cred[1], cred[2], cred[3])
 
 	data, err := ioutil.ReadFile("basho.png")
 
