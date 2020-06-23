@@ -65,7 +65,11 @@ func main() {
 
 	if choice == "yes" || choice == "y" {
 		fmt.Print("posting\n")
-		post(poem)
+		if mode == "static" {
+			post(poem, "basho.png")
+		} else {
+			post(poem, "basho.gif")
+		}
 	} else {
 		fmt.Print("good bye\n")
 	}
@@ -95,7 +99,18 @@ func writeGIF(fileName string, images []image.Image) {
 	var encodedImages []*image.Paletted
 	var delays []int
 
+	// todo these can both be in the same loop, etc
 	for _, img := range images {
+		pImg := image.NewPaletted(img.Bounds(), nil)
+		quantizer := gogif.MedianCutQuantizer{NumColor: 64}
+		quantizer.Quantize(pImg, img.Bounds(), img, image.ZP)
+
+		encodedImages = append(encodedImages, pImg)
+		delays = append(delays, 0)
+	}
+
+	for i := range images {
+		img := images[len(images)-1-i]
 		pImg := image.NewPaletted(img.Bounds(), nil)
 		quantizer := gogif.MedianCutQuantizer{NumColor: 64}
 		quantizer.Quantize(pImg, img.Bounds(), img, image.ZP)
@@ -112,7 +127,7 @@ func writeGIF(fileName string, images []image.Image) {
 
 func doInputPoem(poem string) (string, []image.Image) {
 	world := board.New(poem)
-	generations := len(world.BinaryString)
+	generations := len(poem)
 
 	var images []image.Image
 
@@ -141,7 +156,7 @@ func doRandom() (string, []image.Image) {
 	return doInputPoem(poem)
 }
 
-func post(poem string) {
+func post(poem string, fileName string) {
 	secritsFile, err := os.Open("./secrits.txt")
 	if err != nil {
 		fmt.Print("uhoh")
@@ -157,7 +172,7 @@ func post(poem string) {
 	// heh
 	api := anaconda.NewTwitterApiWithCredentials(cred[0], cred[1], cred[2], cred[3])
 
-	data, err := ioutil.ReadFile("basho.png")
+	data, err := ioutil.ReadFile(fileName)
 
 	if err != nil {
 		fmt.Println(err)
