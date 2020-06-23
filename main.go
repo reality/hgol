@@ -5,6 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/gif"
+	"image/png"
 	"io/ioutil"
 	"math/rand"
 	"net/url"
@@ -13,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/andybons/gogif"
 
 	"github.com/ChimeraCoder/anaconda"
 	"reality.rehab/hgol/board"
@@ -25,18 +30,33 @@ func main() {
 	scanner.Scan()
 	operation := strings.TrimRight(scanner.Text(), "\n")
 
+	fmt.Printf("static or gif mode? ")
+	scanner.Scan()
+	mode := strings.TrimRight(scanner.Text(), "\n")
+	if mode != "static" && mode != "gif" {
+		fmt.Print("wrong. good bye\n")
+		return
+	}
+
 	var poem string
+	var images []image.Image
 	if operation == "input" {
 		fmt.Printf("Enter some text: \n")
 		scanner.Scan()
 
 		re := regexp.MustCompile("\\\\n")
 		text := re.ReplaceAllString(strings.TrimRight(scanner.Text(), "\n"), "\n")
-		poem = doInputPoem(text)
+		poem, images = doInputPoem(text)
 	} else if operation == "random" {
-		poem = doRandom()
+		poem, images = doRandom()
 	}
 	//poem := "My Life\nCame like dew\nDisappears like dew\nAll of Naniwa\nIs dream after Dream"
+
+	if mode == "static" {
+		writePNG("basho.png", images)
+	} else {
+		writeGIF("basho.gif", images)
+	}
 
 	fmt.Print(poem)
 	fmt.Printf("It is saved to basho.png. Do you want to post it to Twitter? ")
@@ -51,20 +71,60 @@ func main() {
 	}
 }
 
-func doInputPoem(poem string) string {
+func writePNG(fileName string, images []image.Image) {
+	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer f.Close()
+
+	png.Encode(f, images[len(images)-1])
+}
+
+func writeGIF(fileName string, images []image.Image) {
+	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer f.Close()
+
+	var encodedImages []*image.Paletted
+	var delays []int
+
+	for _, img := range images {
+		pImg := image.NewPaletted(img.Bounds(), nil)
+		quantizer := gogif.MedianCutQuantizer{NumColor: 64}
+		quantizer.Quantize(pImg, img.Bounds(), img, image.ZP)
+
+		encodedImages = append(encodedImages, pImg)
+		delays = append(delays, 0)
+	}
+
+	gif.EncodeAll(f, &gif.GIF{
+		Image: encodedImages,
+		Delay: delays,
+	})
+}
+
+func doInputPoem(poem string) (string, []image.Image) {
 	world := board.New(poem)
 	generations := len(world.BinaryString)
 
+	var images []image.Image
+
 	for i := 0; i < generations; i++ {
 		world.Progress()
+		images = append(images, world.Draw())
 	}
 
-	world.Draw("basho.png")
-
-	return poem
+	return poem, images
 }
 
-func doRandom() string {
+func doRandom() (string, []image.Image) {
 	poemFile, err := os.Open("./haiku.json")
 	if err != nil {
 		fmt.Print("uhoh")
@@ -118,5 +178,4 @@ func post(poem string) {
 	} else {
 		fmt.Println(result)
 	}
-
 }

@@ -2,14 +2,12 @@ package board
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"math"
 
 	"github.com/fogleman/gg"
-
 	"github.com/muesli/gamut"
-	//"github.com/muesli/gamut/palette"
-	//"github.com/muesli/gamut/theme"
 )
 
 const (
@@ -144,7 +142,7 @@ func (b *Board) getNeighbours(y int, x int) []rune {
 }
 
 // Draw the image. Bit screwed up here because it's er, x,y rather than y,x
-func (b *Board) Draw(fileName string) {
+func (b *Board) Draw() image.Image {
 	g := gg.NewContext(len(b.w[0])*BLOWUP, (len(b.w)*BLOWUP)/2)
 
 	g.DrawRectangle(0, 0, float64(len(b.w[0])*BLOWUP), float64((len(b.w)*BLOWUP)/2))
@@ -176,7 +174,7 @@ func (b *Board) Draw(fileName string) {
 		}
 	}
 
-	g.SavePNG(fileName)
+	return g.Image()
 }
 
 func (b *Board) String() {
