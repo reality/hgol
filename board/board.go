@@ -3,7 +3,7 @@ package board
 import "fmt"
 
 const (
-	MAX_X = 80 // 20 * 8, so we should get 20 characters on each line
+	MAX_X = 50 // 20 * 8, so we should get 20 characters on each line
 )
 
 type Board struct {
@@ -46,8 +46,8 @@ func (b *Board) progress() {}
 // Get the eight neighbours of a cell position.
 // Essentially we either look up the value of the cell, or if it's outside the map, we assume it's dead
 // TODO this could potentially be simplified with a getCell that has a default value
-func (b *Board) getNeighbours(x int, y int) {
-	neighbours := make([]rune, 8)
+func (b *Board) getNeighbours(x int, y int) []rune {
+	var neighbours []rune
 
 	// First we iterate the three cells above our target cell, then the three below
 
@@ -61,7 +61,7 @@ func (b *Board) getNeighbours(x int, y int) {
 			}
 		}
 	} else {
-		neighbours = append(neighbours, []rune{0, 0, 0}...)
+		neighbours = append(neighbours, []rune{'0', '0', '0'}...)
 	}
 
 	below := y + 1
@@ -74,7 +74,7 @@ func (b *Board) getNeighbours(x int, y int) {
 			}
 		}
 	} else {
-		neighbours = append(neighbours, []rune{0, 0, 0}...)
+		neighbours = append(neighbours, []rune{'0', '0', '0'}...)
 	}
 
 	// Now we'll just get x+1 and x-1 manually
@@ -91,6 +91,8 @@ func (b *Board) getNeighbours(x int, y int) {
 	} else {
 		neighbours = append(neighbours, '0')
 	}
+
+	return neighbours
 }
 
 func (b *Board) draw() {}
