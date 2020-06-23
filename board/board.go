@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	MAX_X  = 23
-	BLOWUP = 50
+	MAX_X  = 24
+	BLOWUP = 25
 )
 
 type Board struct {
@@ -167,7 +167,7 @@ func (b *Board) Draw(fileName string) {
 	for y, row := range b.w {
 		for x, cell := range row {
 			if cell == '1' {
-				g.DrawRectangle(float64(x*BLOWUP), float64(y*BLOWUP), 45, 45)
+				g.DrawRectangle(float64(x*BLOWUP), float64(y*BLOWUP), 20, 20)
 				g.SetRGB(float64(rCol), float64(gCol), float64(bCol))
 				g.Fill()
 				fmt.Printf("drawing white at %f %f\n", float64(y*BLOWUP), float64(x*BLOWUP))
