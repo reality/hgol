@@ -32,32 +32,28 @@ func main() {
 
 		re := regexp.MustCompile("\\\\n")
 		text := re.ReplaceAllString(strings.TrimRight(scanner.Text(), "\n"), "\n")
-		fmt.Print(text)
 		poem = doInputPoem(text)
 	} else if operation == "random" {
 		poem = doRandom()
 	}
 	//poem := "My Life\nCame like dew\nDisappears like dew\nAll of Naniwa\nIs dream after Dream"
 
+	fmt.Print(poem)
 	fmt.Printf("It is saved to basho.png. Do you want to post it to Twitter? ")
 	scanner.Scan()
 	choice := strings.TrimRight(scanner.Text(), "\n")
 
 	if choice == "yes" || choice == "y" {
-		fmt.Print("posting")
+		fmt.Print("posting\n")
 		post(poem)
 	} else {
-		fmt.Print("good bye")
+		fmt.Print("good bye\n")
 	}
 }
 
 func doInputPoem(poem string) string {
 	world := board.New(poem)
 	generations := len(world.BinaryString)
-
-	fmt.Print(generations)
-	fmt.Print("\nInitial world:\n")
-	world.String()
 
 	for i := 0; i < generations; i++ {
 		world.Progress()
@@ -82,26 +78,7 @@ func doRandom() string {
 	rand.Seed(time.Now().Unix())
 	poem := poems[rand.Intn(len(poems))]
 
-	world := board.New(poem)
-	generations := len(world.BinaryString)
-
-	fmt.Print(generations)
-	fmt.Print("\nInitial world:\n")
-	world.String()
-
-	for i := 0; i < generations; i++ {
-		world.Progress()
-	}
-
-	fmt.Print("Final world:\n")
-	world.String()
-
-	fmt.Print(poem)
-	fmt.Print('\n')
-
-	world.Draw("basho.png")
-
-	return poem
+	return doInputPoem(poem)
 }
 
 func post(poem string) {
