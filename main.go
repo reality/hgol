@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"net/url"
 	"os"
+	"strconv"
 	"time"
 
+	"github.com/ChimeraCoder/anaconda"
 	"reality.rehab/hgol/board"
 )
 
@@ -49,4 +53,33 @@ func main() {
 	fmt.Print('\n')
 
 	world.Draw("basho.png")
+
+	post(poem)
+}
+
+func post(poem string) {
+	api := anaconda.NewTwitterApiWithCredentials()
+
+	data, err := ioutil.ReadFile("basho.png")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	mediaResponse, err := api.UploadMedia(base64.StdEncoding.EncodeToString(data))
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	v := url.Values{}
+	v.Set("media_ids", strconv.FormatInt(mediaResponse.MediaID, 10))
+	result, err := api.PostTweet(poem, v)
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(result)
+	}
+
 }

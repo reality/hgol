@@ -3,6 +3,7 @@ package board
 import (
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/fogleman/gg"
 
@@ -33,8 +34,8 @@ func New(input string) *Board {
 	}
 
 	// Create the board
-	boardX := MAX_X
-	boardY := int(len(b.BinaryString)/boardX) + 1
+	boardX := int(math.Sqrt(float64(len(b.BinaryString)))) + 2
+	boardY := int(math.Sqrt(float64(len(b.BinaryString))))
 
 	b.w = make([][]rune, boardY)
 	for i := range b.w {
@@ -144,9 +145,9 @@ func (b *Board) getNeighbours(y int, x int) []rune {
 
 // Draw the image. Bit screwed up here because it's er, x,y rather than y,x
 func (b *Board) Draw(fileName string) {
-	g := gg.NewContext(len(b.w[0])*BLOWUP, len(b.w)*BLOWUP)
+	g := gg.NewContext(len(b.w[0])*BLOWUP, (len(b.w)*BLOWUP)/2)
 
-	g.DrawRectangle(0, 0, float64(len(b.w[0])*BLOWUP), float64(len(b.w)*BLOWUP))
+	g.DrawRectangle(0, 0, float64(len(b.w[0])*BLOWUP), float64((len(b.w)*BLOWUP)/2))
 	g.SetRGB(0, 0, 0)
 	g.Fill()
 
@@ -156,7 +157,7 @@ func (b *Board) Draw(fileName string) {
 
 	livingCellColor := color.RGBA{uint8(rCol), uint8(gCol), uint8(bCol), 1}
 
-	g.DrawRectangle(0, 0, float64(len(b.w[0])*BLOWUP), float64(len(b.w)*BLOWUP))
+	g.DrawRectangle(0, 0, float64(len(b.w[0])*BLOWUP), float64((len(b.w)*BLOWUP)/2))
 
 	shades := gamut.Shades(livingCellColor, 5)
 	bgR, bgG, bgB, _ := shades[3].RGBA()
@@ -167,7 +168,7 @@ func (b *Board) Draw(fileName string) {
 	for y, row := range b.w {
 		for x, cell := range row {
 			if cell == '1' {
-				g.DrawRectangle(float64(x*BLOWUP), float64(y*BLOWUP), 20, 20)
+				g.DrawRectangle(float64(x*BLOWUP), float64(y*BLOWUP/2), 10, 20)
 				g.SetRGB(float64(rCol), float64(gCol), float64(bCol))
 				g.Fill()
 				fmt.Printf("drawing white at %f %f\n", float64(y*BLOWUP), float64(x*BLOWUP))
