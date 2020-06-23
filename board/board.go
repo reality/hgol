@@ -3,7 +3,7 @@ package board
 import "fmt"
 
 const (
-	MAX_X = 160 // 20 * 8, so we should get 20 characters on each line
+	MAX_X = 80 // 20 * 8, so we should get 20 characters on each line
 )
 
 type Board struct {
@@ -43,7 +43,55 @@ func New(input string) *Board {
 
 func (b *Board) progress() {}
 
-func (b *Board) getNeighbours() {}
+// Get the eight neighbours of a cell position.
+// Essentially we either look up the value of the cell, or if it's outside the map, we assume it's dead
+// TODO this could potentially be simplified with a getCell that has a default value
+func (b *Board) getNeighbours(x int, y int) {
+	neighbours := make([]rune, 8)
+
+	// First we iterate the three cells above our target cell, then the three below
+
+	above := y - 1
+	if above >= 0 && above < len(b.w) {
+		for tX := x - 1; tX <= x+1; tX++ {
+			if tX >= 0 && tX < len(b.w[above]) {
+				neighbours = append(neighbours, b.w[above][tX])
+			} else {
+				neighbours = append(neighbours, '0')
+			}
+		}
+	} else {
+		neighbours = append(neighbours, []rune{0, 0, 0}...)
+	}
+
+	below := y + 1
+	if below >= 0 && below < len(b.w) {
+		for tX := x - 1; tX <= x+1; tX++ {
+			if tX >= 0 && tX < len(b.w[below]) {
+				neighbours = append(neighbours, b.w[below][tX])
+			} else {
+				neighbours = append(neighbours, '0')
+			}
+		}
+	} else {
+		neighbours = append(neighbours, []rune{0, 0, 0}...)
+	}
+
+	// Now we'll just get x+1 and x-1 manually
+	previous := x - 1
+	if previous > 0 && previous < len(b.w[y]) {
+		neighbours = append(neighbours, b.w[y][previous])
+	} else {
+		neighbours = append(neighbours, '0')
+	}
+
+	following := x + 1
+	if following > 0 && following < len(b.w[y]) {
+		neighbours = append(neighbours, b.w[y][following])
+	} else {
+		neighbours = append(neighbours, '0')
+	}
+}
 
 func (b *Board) draw() {}
 
