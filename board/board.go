@@ -2,53 +2,28 @@ package board
 
 import (
 	"fmt"
-	"image"
-	"image/color"
-	"math"
-
-	"github.com/fogleman/gg"
-	"github.com/muesli/gamut"
-)
-
-const (
-	MAX_X  = 24
-	BLOWUP = 25
 )
 
 type Board struct {
-	w            [][]rune // the w-orld
-	inputString  string
-	BinaryString string
+	w [][]rune // the w-orld
 }
 
-func New(input string) *Board {
-	b := &Board{
-		inputString: input,
-	}
+func New(boardX, boardY int) *Board {
 
-	// Build the binary string
-	for _, c := range b.inputString {
-		b.BinaryString = fmt.Sprintf("%s%08b", b.BinaryString, c)
-	}
-
-	// Create the board
-	boardX := int(math.Sqrt(float64(len(b.BinaryString)))) + 2
-	boardY := int(math.Sqrt(float64(len(b.BinaryString))))
-
-	b.w = make([][]rune, boardY)
+	// Create the board with the given size
+	b := &Board{}
+	b.w = make([][]rune, boardX)
 	for i := range b.w {
-		b.w[i] = make([]rune, boardX)
+		b.w[i] = make([]rune, boardY)
 	}
 
-	// Initialise the board with the binarised string
-	for pos, char := range b.BinaryString {
-		charY, charX := pos/boardX, pos%boardX
-		b.w[charY][charX] = char
-	}
+	// Now we need to initialise the world with tiles
+	// So I think the general idea is that we want to create sort of 'veins' of different habitats. I guess we can look up ways to do that.
+	// for now we will make it into 0
 
-	for pos, char := range b.w[boardY-1] {
-		if char != '0' && char != '1' {
-			b.w[boardY-1][pos] = '0'
+	for x, col := range b.w {
+		for y, _ := range col {
+			b.w[x][y] = '0'
 		}
 	}
 
@@ -60,30 +35,6 @@ func (b *Board) Progress() {
 	for i := range b.w {
 		newWorld[i] = make([]rune, len(b.w[i]))
 		copy(newWorld[i], b.w[i])
-	}
-
-	for y, row := range b.w {
-		for x, cell := range row {
-			neighbours := b.getNeighbours(y, x)
-			aliveNeighbours := 0
-
-			for _, nVal := range neighbours {
-				if nVal == '1' {
-					aliveNeighbours++
-				}
-			}
-
-			//fmt.Printf("y=%d,x=%d. alive neighbours=%d\n", y, x, aliveNeighbours)
-
-			// a dead cell with three living neighbours becomes alive, a living cell with two or three living neighbours can remain alive, but otherwise, everything must die
-			if cell == '0' && aliveNeighbours == 3 {
-				cell = '1'
-			} else if !(cell == '1' && (aliveNeighbours == 2 || aliveNeighbours == 3)) {
-				cell = '0'
-			}
-
-			newWorld[y][x] = cell
-		}
 	}
 
 	b.w = newWorld
@@ -141,42 +92,7 @@ func (b *Board) getNeighbours(y int, x int) []rune {
 	return neighbours
 }
 
-// Draw the image. Bit screwed up here because it's er, x,y rather than y,x
-func (b *Board) Draw() image.Image {
-	g := gg.NewContext(len(b.w[0])*BLOWUP, (len(b.w)*BLOWUP)/2)
-
-	g.DrawRectangle(0, 0, float64(len(b.w[0])*BLOWUP), float64((len(b.w)*BLOWUP)/2))
-	g.SetRGB(0, 0, 0)
-	g.Fill()
-
-	rCol := int(b.inputString[0] - '0')
-	gCol := int(b.inputString[1] - '0')
-	bCol := int(b.inputString[2] - '0')
-
-	livingCellColor := color.RGBA{uint8(rCol), uint8(gCol), uint8(bCol), 1}
-
-	g.DrawRectangle(0, 0, float64(len(b.w[0])*BLOWUP), float64((len(b.w)*BLOWUP)/2))
-
-	shades := gamut.Shades(livingCellColor, 5)
-	bgR, bgG, bgB, _ := shades[3].RGBA()
-	g.SetRGB(float64(bgR), float64(bgG), float64(bgB))
-
-	g.Fill()
-
-	for y, row := range b.w {
-		for x, cell := range row {
-			if cell == '1' {
-				g.DrawRectangle(float64(x*BLOWUP), float64(y*BLOWUP/2), 10, 20)
-				g.SetRGB(float64(rCol), float64(gCol), float64(bCol))
-				g.Fill()
-				fmt.Printf("drawing white at %f %f\n", float64(y*BLOWUP), float64(x*BLOWUP))
-			}
-		}
-	}
-
-	return g.Image()
-}
-
+// currently the wrong way around
 func (b *Board) String() {
 	for _, row := range b.w {
 		for _, cell := range row {
