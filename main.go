@@ -20,7 +20,7 @@ import (
 	"github.com/andybons/gogif"
 
 	"github.com/ChimeraCoder/anaconda"
-	"reality.rehab/hgol/board"
+	"reality.rehab/catastrophe/world"
 )
 
 func main() {

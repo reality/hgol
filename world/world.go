@@ -1,20 +1,20 @@
-package board
+package world
 
 import (
 	"fmt"
 )
 
-type Board struct {
+type World struct {
 	w [][]rune // the w-orld
 }
 
-func New(boardX, boardY int) *Board {
+func New(sizeX, sizeY int) *World {
 
 	// Create the board with the given size
-	b := &Board{}
-	b.w = make([][]rune, boardX)
+	b := &World{}
+	b.w = make([][]rune, sizeX)
 	for i := range b.w {
-		b.w[i] = make([]rune, boardY)
+		b.w[i] = make([]rune, sizeY)
 	}
 
 	// Now we need to initialise the world with tiles
@@ -30,7 +30,7 @@ func New(boardX, boardY int) *Board {
 	return b
 }
 
-func (b *Board) Progress() {
+func (b *World) Progress() {
 	newWorld := make([][]rune, len(b.w))
 	for i := range b.w {
 		newWorld[i] = make([]rune, len(b.w[i]))
@@ -43,7 +43,7 @@ func (b *Board) Progress() {
 // Get the eight neighbours of a cell position.
 // Essentially we either look up the value of the cell, or if it's outside the map, we assume it's dead
 // TODO this could potentially be simplified with a getCell that has a default value
-func (b *Board) getNeighbours(y int, x int) []rune {
+func (b *World) getNeighbours(y int, x int) []rune {
 	var neighbours []rune
 
 	// First we iterate the three cells above our target cell, then the three below
@@ -93,7 +93,7 @@ func (b *Board) getNeighbours(y int, x int) []rune {
 }
 
 // currently the wrong way around
-func (b *Board) String() {
+func (b *World) String() {
 	for _, row := range b.w {
 		for _, cell := range row {
 			fmt.Printf("%c", cell)
